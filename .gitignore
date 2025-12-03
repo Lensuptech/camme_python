@@ -1,11 +1,24 @@
+# Python
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.env
-venv/
-.venv/
-instance/
-*.db
-*.sqlite3
 
+# Virtual environment
+venv/
+env/
+
+# Flask instance folder
+instance/
+
+# Saved images
+saved_images/
+
+# Logs
+*.log
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
