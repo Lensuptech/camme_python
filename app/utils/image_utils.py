@@ -2,7 +2,6 @@ import cv2
 import io
 import numpy as np
 from PIL import Image, ImageEnhance, ImageOps, ImageFilter
-from scipy.ndimage import gaussian_filter
 
 
 # ---------------------------------------------------
@@ -165,7 +164,7 @@ def adjust_image(arr, params):
 
         # Smoothness
         if smoothness != 0:
-            np_img = gaussian_filter(np_img, sigma=[smoothness * 5, smoothness * 5, 0])
+            np_img = cv2.GaussianBlur(np_img, sigma=[smoothness * 5, smoothness * 5, 0])
 
         # Noise
         if noise > 0:
