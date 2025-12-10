@@ -1,8 +1,6 @@
-import cv2
 import io
 import numpy as np
 from PIL import Image, ImageEnhance, ImageOps, ImageFilter
-
 
 # ---------------------------------------------------
 # Parameter Validation
@@ -162,9 +160,11 @@ def adjust_image(arr, params):
             gray = np.mean(np_img, axis=2, keepdims=True)
             np_img += (np_img - gray) * vibrance
 
-        # Smoothness
+        # Smoothness (Pillow Gaussian Blur)
         if smoothness != 0:
-            np_img = cv2.GaussianBlur(np_img, sigma=[smoothness * 5, smoothness * 5, 0])
+            pil_smooth = Image.fromarray(np.clip(np_img, 0, 255).astype(np.uint8))
+            pil_smooth = pil_smooth.filter(ImageFilter.GaussianBlur(radius=smoothness*5))
+            np_img = np.array(pil_smooth).astype(np.float32)
 
         # Noise
         if noise > 0:
@@ -177,7 +177,10 @@ def adjust_image(arr, params):
             h, w = np_img.shape[:2]
             grain = np.random.normal(0, grain_amount * 30, (h, w))
             k = max(1, int(grain_size * 2) + 1)
-            grain = cv2.GaussianBlur(grain, (k, k), 0) * grain_roughness
+            # approximate blur with Pillow
+            pil_grain = Image.fromarray((grain * 255).astype(np.uint8))
+            pil_grain = pil_grain.filter(ImageFilter.GaussianBlur(radius=k))
+            grain = np.array(pil_grain) / 255.0 * grain_roughness
             np_img += grain[:, :, None]
 
         # ---------------------------------------------------
@@ -192,7 +195,9 @@ def adjust_image(arr, params):
                 np.clip((dist / np.max(dist) - vignette_midpoint) / (1 - vignette_midpoint), 0, 1)
             )
             if vignette_feather > 1:
-                mask = cv2.GaussianBlur(mask, (vignette_feather, vignette_feather), 0)
+                pil_mask = Image.fromarray((mask * 255).astype(np.uint8))
+                pil_mask = pil_mask.filter(ImageFilter.GaussianBlur(radius=vignette_feather))
+                mask = np.array(pil_mask) / 255.0
 
             np_img *= mask[:, :, None]
 
@@ -205,12 +210,14 @@ def adjust_image(arr, params):
             np_img = np.array(pil_img).astype(np.float32)
 
         # ---------------------------------------------------
-        # Hue
+        # Hue (approximate via Pillow conversion)
         # ---------------------------------------------------
         if hue != 0:
-            hsv = cv2.cvtColor(np_img.astype(np.uint8), cv2.COLOR_RGB2HSV).astype(np.float32)
-            hsv[:, :, 0] = (hsv[:, :, 0] + hue) % 180
-            np_img = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2RGB).astype(np.float32)
+            pil_hue = Image.fromarray(np.clip(np_img, 0, 255).astype(np.uint8)).convert("HSV")
+            hsv_arr = np.array(pil_hue).astype(np.float32)
+            hsv_arr[:, :, 0] = (hsv_arr[:, :, 0] + hue) % 255
+            pil_hue = Image.fromarray(hsv_arr.astype(np.uint8), mode="HSV").convert("RGB")
+            np_img = np.array(pil_hue).astype(np.float32)
 
         return np.clip(np_img, 0, 255)
 
