@@ -5,7 +5,7 @@ import numpy as np
 import io
 import time
 import os
-from PIL import Image, ImageOps, ImageFilter
+from PIL import Image, ImageOps
 import base64
 from app.utils.blur_utils import (
     linear_blur, radial_blur, oval_blur, focus_blur,
