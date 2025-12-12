@@ -25,11 +25,34 @@ os.makedirs(SAVE_FOLDER, exist_ok=True)
 # Health Check
 @image_bp.route("/", methods=["GET"])
 def index():
+    """
+    Health Check
+    ---
+    tags:
+      - Health Check
+    responses:
+      200:
+        description: Health Check returned successfully
+      500:
+        description: Error while fetching Health Check
+    """
     return jsonify({"message": "Image Editor API running successfully!"})
+
 
 # EDIT IMAGE (filters, adjustments)
 @image_bp.route("/edit", methods=["POST"])
 def edit_image():
+    """
+    Edit Image
+    ---
+    tags:
+      - Images
+    responses:
+      200:
+        description: Image edited successfully
+      500:
+        description: Error while editing image
+    """
     try:
         if "image" not in request.files:
             return jsonify({"error": "No image uploaded"}), 400
@@ -76,9 +99,21 @@ def edit_image():
             "details": str(e)
         }), 500
 
+
 # BLUR ENDPOINT (without OpenCV)
 @image_bp.route("/blur", methods=["POST"])
 def blur_endpoint():
+    """
+    Add Blur
+    ---
+    tags:
+      - Images
+    responses:
+      200:
+        description: Blur added tp image successfully
+      500:
+        description: Error while adding blur to image
+    """
     try:
         if "image" not in request.files:
             return jsonify({"error": "No image uploaded"}), 400
@@ -130,9 +165,21 @@ def blur_endpoint():
     except Exception as e:
         return jsonify({"error": f"Blur processing failed: {str(e)}"}), 500
 
+
 # ENHANCE IMAGE
 @image_bp.route("/enhance", methods=["POST"])
 def enhance_image():
+    """
+    Enhance Image
+    ---
+    tags:
+      - Images
+    responses:
+      200:
+        description: Image enhances are added successfully
+      500:
+        description: Error while doing enhancements to image
+    """
     try:
         if "image" not in request.files:
             return jsonify({"error": "No image uploaded"}), 400
@@ -153,9 +200,21 @@ def enhance_image():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 # SAVE IMAGE LOCALLY
 @image_bp.route("/save", methods=["POST"])
 def save_image_endpoint():
+    """
+    Save Image
+    ---
+    tags:
+      - Images
+    responses:
+      200:
+        description: Image saved successfully
+      500:
+        description: Error while saving image
+    """
     try:
         if "image" not in request.files:
             return jsonify({"isSuccess": False, "message": "No image uploaded"}), 400
